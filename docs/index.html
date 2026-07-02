@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4a90d9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="文法カード">
+<title>英文法フラッシュカード - GrammarCards</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================
+     (A) ホーム画面
+     ============================================ -->
+<section id="screen-home" class="screen active">
+  <header class="app-header">
+    <h1>英文法フラッシュカード</h1>
+    <button id="btn-open-settings" class="icon-btn" aria-label="設定">⚙️</button>
+  </header>
+
+  <div id="home-loading" class="loading-box">読み込み中...</div>
+
+  <div id="home-content" class="hidden">
+    <section class="stat-section">
+      <h2>今日の状況</h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span id="stat-due" class="stat-num">0</span>
+          <span class="stat-label">復習予定</span>
+        </div>
+        <div class="stat-card">
+          <span id="stat-new" class="stat-num">0</span>
+          <span class="stat-label">新規カード</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="stat-section">
+      <h2>全体の習熟度</h2>
+      <div class="progress-bar-container">
+        <div class="progress-bar">
+          <div id="bar-mastered" class="bar-mastered" style="width:0%"></div>
+          <div id="bar-learning" class="bar-learning" style="width:0%"></div>
+          <div id="bar-new" class="bar-new"></div>
+        </div>
+      </div>
+      <div class="progress-legend">
+        <span class="legend-mastered">■ 習得 <span id="legend-mastered-count">0</span></span>
+        <span class="legend-learning">■ 学習中 <span id="legend-learning-count">0</span></span>
+        <span class="legend-new">■ 未着手 <span id="legend-new-count">0</span></span>
+      </div>
+      <div class="total-note">全<span id="stat-total">0</span>枚</div>
+    </section>
+
+    <section class="stat-section">
+      <h2>出題範囲</h2>
+      <div class="filter-row" id="book-filter-row">
+        <button class="filter-chip selected" data-book="all">両方</button>
+        <button class="filter-chip" data-book="forest">Forest</button>
+        <button class="filter-chip" data-book="chigasaki">茅ヶ崎方式</button>
+      </div>
+      <input type="text" id="category-search" class="category-search" placeholder="文法カテゴリで絞り込み（例: 仮定法）">
+    </section>
+
+    <button id="btn-start-study" class="btn-primary">今日の問題を始める</button>
+    <p id="no-cards-msg" class="no-cards hidden">この範囲に出題できるカードがありません。設定や絞り込みを見直してください。</p>
+  </div>
+</section>
+
+<!-- ============================================
+     (B) 学習画面
+     ============================================ -->
+<section id="screen-study" class="screen">
+  <div class="study-header">
+    <button id="btn-quit-study" class="icon-btn" aria-label="終了">✕</button>
+    <div class="progress-indicator">
+      <span id="study-progress-label">0 / 0</span>
+      <div class="progress-mini-bar">
+        <div id="study-progress-fill" class="progress-mini-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-area">
+    <div id="flashcard" class="flashcard">
+      <span id="card-type-badge" class="card-type-badge">-</span>
+      <span id="card-category" class="card-category"></span>
+      <div id="question-text" class="question-text"></div>
+
+      <div id="answer-area"></div>
+
+      <div id="answer-reveal" class="answer-reveal hidden">
+        <div id="result-banner" class="result-banner"></div>
+        <div id="correct-answer-text" class="correct-answer-text"></div>
+        <div id="explanation-text" class="explanation-text"></div>
+        <div class="card-meta" id="card-meta"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="submit-row" class="submit-row">
+    <button id="btn-submit-answer" class="btn-primary">答え合わせ</button>
+  </div>
+
+  <div id="grade-buttons" class="grade-buttons hidden">
+    <button id="btn-grade-wrong" class="btn-wrong">✕ 不正解</button>
+    <button id="btn-grade-correct" class="btn-correct">⭕ 正解</button>
+  </div>
+</section>
+
+<!-- ============================================
+     (C) 結果画面
+     ============================================ -->
+<section id="screen-result" class="screen">
+  <header class="app-header">
+    <h1>お疲れさまでした</h1>
+  </header>
+  <div class="result-content">
+    <div class="result-score">
+      <span id="result-correct">0</span><span class="result-slash">/</span><span id="result-total">0</span>
+      <div class="result-label">正解数</div>
+    </div>
+    <div class="result-details">
+      今日学習したカード: <strong id="result-studied">0</strong>枚<br>
+      正答率: <strong id="result-rate">0</strong>%
+    </div>
+    <div class="result-buttons">
+      <button id="btn-result-home" class="btn-secondary">ホームへ</button>
+      <button id="btn-result-again" class="btn-primary">続けて学習</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     (D) 設定画面
+     ============================================ -->
+<section id="screen-settings" class="screen">
+  <header class="app-header">
+    <button id="btn-close-settings" class="icon-btn" aria-label="戻る">←</button>
+    <h1>設定</h1>
+    <span style="width:32px"></span>
+  </header>
+
+  <div class="settings-content">
+    <section class="settings-section">
+      <h2>学習ボリューム</h2>
+      <div class="settings-row">
+        <span>1回のセッション枚数</span>
+        <input type="number" id="setting-session-size" min="5" max="200" step="5">
+      </div>
+      <div class="settings-row">
+        <span>1日の新規カード上限</span>
+        <input type="number" id="setting-new-per-day" min="1" max="200" step="1">
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>データ管理</h2>
+      <button id="btn-export" class="btn-secondary">学習履歴をエクスポート</button>
+      <label class="btn-secondary btn-file-label">
+        学習履歴をインポート
+        <input type="file" id="import-file" accept="application/json" style="display:none">
+      </label>
+      <button id="btn-reset" class="btn-danger">学習履歴をリセット</button>
+      <p id="settings-save-msg" class="save-msg hidden">保存しました</p>
+    </section>
+
+    <p class="settings-info">GrammarCards / Forest・茅ヶ崎方式国際英語教本文法より抽出</p>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

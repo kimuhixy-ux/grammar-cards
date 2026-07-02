@@ -1,0 +1,9 @@
+source_pdfs/
+pipeline/cache/
+pipeline/pages/
+pipeline/output/
+.env
+__pycache__/
+*.pyc
+.DS_Store
+.claude/
