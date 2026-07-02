@@ -128,6 +128,11 @@ grammar_cards/
 
 - GitHub Pages（`docs/`フォルダ）— jazz-irealと同じ運用方法
 - 元PDF・`pipeline/`の中間生成物（画像・キャッシュ）はリポジトリに含めない（`.gitignore`）。公開してよいのは `docs/data/cards.json` のみ
+- **`docs/data/cards.json` を更新するデプロイでは、必ず `docs/sw.js` の `CACHE_NAME` をインクリメントすること**
+  （例: `grammarcards-v1` → `v2`）。Service Workerはcache-first方式で、`sw.js`自体のバイト列が
+  変わらない限りブラウザが更新を検知せず、古いキャッシュ（古い`cards.json`含む）を無期限に
+  返し続けてしまう（教材追加時にこれを忘れて一度ハマった。`sw.js`本体を書き換えなくても
+  `CACHE_NAME`の値を変えるだけでよい）。
 
 ## 著作権に関する注意（必ず守ること）
 

@@ -2,7 +2,7 @@
    Service Worker - オフライン対応キャッシュ
    ============================================================ */
 
-const CACHE_NAME = 'grammarcards-v1';
+const CACHE_NAME = 'grammarcards-v2';
 
 const FILES_TO_CACHE = [
   './',
