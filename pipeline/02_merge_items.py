@@ -16,8 +16,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "pipeline" / "cache"
 OUTPUT_DIR = ROOT / "pipeline" / "output"
+ID_REGISTRY_PATH = OUTPUT_DIR / "category_id_registry.json"
 
-CACHE_FILE_RE = re.compile(r"^(forest|chigasaki)_(\d{4})\.json$")
+CACHE_FILE_RE = re.compile(r"^(forest|chigasaki|ex_grammar)_(\d{4})\.json$")
 
 
 def load_entries() -> list[tuple[str, int, dict]]:
@@ -69,23 +70,48 @@ def merge_entries(entries: list[tuple[str, int, dict]]) -> "OrderedDict[str, dic
     return grouped
 
 
-def build_output(grouped: "OrderedDict[str, dict]") -> list[dict]:
+def load_id_registry() -> "OrderedDict[str, str]":
+    """grammar_category文字列 -> item-XXXX ID の永続マッピング。
+    Phase 3のカード生成キャッシュ（pipeline/cache/cards/item-XXXX.json）はこのIDに紐づくため、
+    書籍を追加するたびにID採番順（キャッシュファイル名のアルファベット順）が変わっても、
+    既存カテゴリのIDは変えてはならない（変えるとキャッシュが別カテゴリに誤って結びつく）。
+    """
+    if ID_REGISTRY_PATH.exists():
+        return OrderedDict(json.loads(ID_REGISTRY_PATH.read_text()))
+    return OrderedDict()
+
+
+def save_id_registry(registry: "OrderedDict[str, str]") -> None:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    ID_REGISTRY_PATH.write_text(json.dumps(registry, ensure_ascii=False, indent=2))
+
+
+def build_output(grouped: "OrderedDict[str, dict]", registry: "OrderedDict[str, str]") -> list[dict]:
+    next_idx = max((int(v.split("-")[1]) for v in registry.values()), default=0) + 1
+    for category in grouped:
+        if category not in registry:
+            registry[category] = f"item-{next_idx:04d}"
+            next_idx += 1
+
     result = []
-    for idx, (category, g) in enumerate(grouped.items(), start=1):
+    for category, g in grouped.items():
         result.append({
-            "id": f"item-{idx:04d}",
+            "id": registry[category],
             "grammar_category": category,
             "explanation_ja": "\n".join(g["explanations"]),
             "example_sentences": g["example_sentences"],
             "sources": g["sources"],
         })
+    result.sort(key=lambda item: int(item["id"].split("-")[1]))
     return result
 
 
 def main():
     entries = load_entries()
     grouped = merge_entries(entries)
-    result = build_output(grouped)
+    registry = load_id_registry()
+    result = build_output(grouped, registry)
+    save_id_registry(registry)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / "grammar_items.json"

@@ -17,7 +17,7 @@ const TYPE_LABELS = {
   translate_ja_to_en: '和文英訳',
 };
 
-const BOOK_LABELS = { forest: 'Forest', chigasaki: '茅ヶ崎方式' };
+const BOOK_LABELS = { forest: 'Forest', chigasaki: '茅ヶ崎方式', ex_grammar: 'EX Grammar' };
 
 const DEFAULT_SETTINGS = {
   sessionSize: 30,
