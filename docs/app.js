@@ -68,7 +68,7 @@ function normalizeAnswerText(s) {
 }
 
 function normalizeCompact(s) {
-  return (s || '').toLowerCase().replace(/\s+/g, '');
+  return normalizeAnswerText(s).replace(/\s+/g, '');
 }
 
 /* ---------------- localStorage ---------------- */
